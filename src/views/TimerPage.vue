@@ -1,11 +1,11 @@
 <template>
+    <Timer @sendTime="recieveTime($event)" />
     <div id="times-container">
         <ul>
             <p>Times:</p>
             <li v-for="time in displayTimes">{{ time }}</li>
         </ul>
     </div>
-    <Timer @sendTime="recieveTime($event)" id="timer" />
 </template>
 
 <script lang="ts">
@@ -18,23 +18,37 @@ export default defineComponent({
     setup() {
         // variables
         const Cookies = require("js-cookie");
-        let storredTimes: number[] = [];
+        type Time = { time: number; id: number };
+        let storredTimes: Time[] = [];
         let displayTimes = ref<string[]>([]);
+        let currentId = -1;
 
         // functions
         function recieveTime(time: number) {
-            storredTimes.push(Number(time.toString().slice(0, -1)));
+            currentId++;
+            storredTimes.push({ time: Number(time.toString().slice(0, -1)), id: currentId });
             displayTimes.value = [];
-            Cookies.set("storredTimes", JSON.stringify(storredTimes), { expires: 7200 /*19 years*/ });
+            Cookies.set("currentId", currentId, { expires: 7200 /*19 years*/ });
+            Cookies.set("storredTimes", JSON.stringify(storredTimes), { expires: 7200 });
+            // sort the array
+            storredTimes.sort((a, b) => {
+                if (a.id > b.id) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+            // fill up displayTimes arr
             storredTimes.forEach((time) => {
-                displayTimes.value.push(formatTime(time.toString()));
+                displayTimes.value.push(formatTime(time.time.toString()));
             });
         }
 
         if (Cookies.get("storredTimes")) {
+            currentId = Cookies.get("currentId");
             storredTimes = JSON.parse(Cookies.get("storredTimes"));
             storredTimes.forEach((time) => {
-                displayTimes.value.push(formatTime(time.toString()));
+                displayTimes.value.push(formatTime(time.time.toString()));
             });
         }
 

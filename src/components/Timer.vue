@@ -1,5 +1,7 @@
 <template>
-    <p @click="timerFunc()" class="m-3 p-3 text-center fs-1">{{ displayTime }}</p>
+    <div id="timer">
+        <p @click="timerFunc()" class="text-center fs-1">{{ displayTime }}</p>
+    </div>
 </template>
 
 <script lang="ts">
