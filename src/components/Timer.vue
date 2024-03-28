@@ -34,6 +34,7 @@ export default defineComponent({
                 clearInterval(interval);
                 storredTimes.push(time.value);
                 time.value = Number(new Date()) - start;
+                displayTime.value = formatTime(time.value.toString().slice(0, -1));
                 ctx.emit("sendTime", time.value);
             }
         }
