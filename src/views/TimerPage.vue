@@ -24,7 +24,7 @@ export default defineComponent({
     setup() {
         //* variables
         const Cookies = require("js-cookie");
-        type Time = { time: number; displayTime: string; id: number };
+        type Time = { time: number; displayTime: string; isPlus2: boolean; id: number };
         let storredTimes = ref<Time[]>([]);
         let currentId = -1;
 
@@ -35,6 +35,7 @@ export default defineComponent({
             storredTimes.value.push({
                 time: Number(time.toString().slice(0, -1)),
                 displayTime: formatTime(time.toString().slice(0, -1)),
+                isPlus2: false,
                 id: currentId,
             });
             //* set the cookies
@@ -59,8 +60,13 @@ export default defineComponent({
 
         function addPlus2(id: number) {
             storredTimes.value.forEach((e) => {
-                if (e.id == id) {
+                if (e.id == id && !e.isPlus2) {
+                    e.isPlus2 = true;
                     e.time += 200;
+                    e.displayTime = formatTime(e.time.toString());
+                } else if (e.id == id && e.isPlus2) {
+                    e.isPlus2 = false;
+                    e.time -= 200;
                     e.displayTime = formatTime(e.time.toString());
                 }
             });
