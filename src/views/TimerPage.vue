@@ -3,7 +3,12 @@
     <div id="times-container" style="height: 50vh">
         <ul style="height: 50vh" class="overflow-y-scroll">
             <p style="display: sticky">Times:</p>
-            <li v-for="time in displayTimes">{{ time.time }}</li>
+            <li v-for="time in displayTimes">
+                <div>
+                    {{ time.time }}
+                    <button @click="deleteTime(time.id)">x</button>
+                </div>
+            </li>
         </ul>
     </div>
 </template>
@@ -16,23 +21,32 @@ export default defineComponent({
     components: { Timer },
     name: "timerPage",
     setup() {
-        // variables
+        //* variables
         const Cookies = require("js-cookie");
         type Time = { time: number; id: number };
         type DisplayTime = { time: string; id: number };
         let storredTimes: Time[] = [];
         let displayTimes = ref<DisplayTime[]>([]);
-        let currentId = 0;
+        let currentId = -1;
 
-        // functions
+        //* functions
         function recieveTime(time: number) {
-            currentId = currentId == 0 ? 0 : ++currentId;
+            currentId++;
+            //* update arrays
             storredTimes.push({ time: Number(time.toString().slice(0, -1)), id: currentId });
             displayTimes.value.push({ time: formatTime(time.toString().slice(0, -1)), id: currentId });
+            //* set the cookies
             Cookies.set("currentId", currentId, { expires: 7200 /*about 20 years*/ });
             Cookies.set("storredTimes", JSON.stringify(storredTimes), { expires: 7200 });
-            // sort the array
+            //* sort the arrays
             storredTimes.sort((a, b) => {
+                if (a.id > b.id) {
+                    return -1;
+                } else {
+                    return 1;
+                }
+            });
+            displayTimes.value.sort((a, b) => {
                 if (a.id > b.id) {
                     return -1;
                 } else {
@@ -41,17 +55,26 @@ export default defineComponent({
             });
         }
 
+        function deleteTime(id: number) {
+            console.log(id);
+            storredTimes = storredTimes.filter((e) => e.id != id);
+            displayTimes.value = displayTimes.value.filter((e) => e.id != id);
+
+            Cookies.set("storredTimes", JSON.stringify(storredTimes), { expires: 7200 });
+        }
+
         if (Cookies.get("storredTimes")) {
             currentId = Cookies.get("currentId");
             storredTimes = JSON.parse(Cookies.get("storredTimes"));
             storredTimes.forEach((time) => {
-                displayTimes.value.push({ time: formatTime(time.time.toString().slice(0, -1)), id: time.id });
+                displayTimes.value.push({ time: formatTime(time.time.toString()), id: time.id });
             });
         }
 
         return {
             recieveTime,
             displayTimes,
+            deleteTime,
         };
     },
 });
