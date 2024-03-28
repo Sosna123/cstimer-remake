@@ -8,11 +8,13 @@
 import { defineComponent, ref } from "vue";
 export default defineComponent({
     name: "timer",
-    setup() {
+    emits: ["sendTime"],
+    setup(props, ctx) {
         let start: number = 0;
-        let time = ref<Number>(0);
+        let time = ref<number>(0);
         let interval: number;
         let isTimerRunning: boolean = false;
+        let storredTimes: number[] = [];
 
         function timerFunc() {
             if (!isTimerRunning) {
@@ -29,6 +31,9 @@ export default defineComponent({
                 // stop the timer
                 isTimerRunning = false;
                 clearInterval(interval);
+                time.value = Number(new Date()) - start;
+                storredTimes.push(time.value);
+                ctx.emit("sendTime", time.value);
             }
         }
 

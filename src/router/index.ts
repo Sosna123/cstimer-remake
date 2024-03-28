@@ -1,11 +1,11 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import Timer from "../views/Timer.vue";
+import TimerPage from "../views/TimerPage.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
         path: "/",
-        name: "timer",
-        component: Timer,
+        name: "timerPage",
+        component: TimerPage,
     },
     // {
     //   path: '/about',
