@@ -3,9 +3,10 @@
     <div id="times-container" style="height: 50vh">
         <ul style="height: 50vh" class="overflow-y-scroll">
             <p style="display: sticky">Times:</p>
-            <li v-for="time in displayTimes">
+            <li v-for="time in storredTimes">
                 <div>
-                    {{ time.time }}
+                    {{ time.displayTime }}
+                    <button @click="addPlus2(time.id)">+2</button>
                     <button @click="deleteTime(time.id)">x</button>
                 </div>
             </li>
@@ -23,30 +24,24 @@ export default defineComponent({
     setup() {
         //* variables
         const Cookies = require("js-cookie");
-        type Time = { time: number; id: number };
-        type DisplayTime = { time: string; id: number };
-        let storredTimes: Time[] = [];
-        let displayTimes = ref<DisplayTime[]>([]);
+        type Time = { time: number; displayTime: string; id: number };
+        let storredTimes = ref<Time[]>([]);
         let currentId = -1;
 
         //* functions
         function recieveTime(time: number) {
             currentId++;
             //* update arrays
-            storredTimes.push({ time: Number(time.toString().slice(0, -1)), id: currentId });
-            displayTimes.value.push({ time: formatTime(time.toString().slice(0, -1)), id: currentId });
+            storredTimes.value.push({
+                time: Number(time.toString().slice(0, -1)),
+                displayTime: formatTime(time.toString().slice(0, -1)),
+                id: currentId,
+            });
             //* set the cookies
             Cookies.set("currentId", currentId, { expires: 7200 /*about 20 years*/ });
-            Cookies.set("storredTimes", JSON.stringify(storredTimes), { expires: 7200 });
+            Cookies.set("storredTimes", JSON.stringify(storredTimes.value), { expires: 7200 });
             //* sort the arrays
-            storredTimes.sort((a, b) => {
-                if (a.id > b.id) {
-                    return -1;
-                } else {
-                    return 1;
-                }
-            });
-            displayTimes.value.sort((a, b) => {
+            storredTimes.value.sort((a, b) => {
                 if (a.id > b.id) {
                     return -1;
                 } else {
@@ -57,24 +52,32 @@ export default defineComponent({
 
         function deleteTime(id: number) {
             console.log(id);
-            storredTimes = storredTimes.filter((e) => e.id != id);
-            displayTimes.value = displayTimes.value.filter((e) => e.id != id);
+            storredTimes.value = storredTimes.value.filter((e) => e.id != id);
 
-            Cookies.set("storredTimes", JSON.stringify(storredTimes), { expires: 7200 });
+            Cookies.set("storredTimes", JSON.stringify(storredTimes.value), { expires: 7200 });
+        }
+
+        function addPlus2(id: number) {
+            storredTimes.value.forEach((e) => {
+                if (e.id == id) {
+                    e.time += 200;
+                    e.displayTime = formatTime(e.time.toString());
+                }
+            });
+
+            Cookies.set("storredTimes", JSON.stringify(storredTimes.value), { expires: 7200 });
         }
 
         if (Cookies.get("storredTimes")) {
             currentId = Cookies.get("currentId");
-            storredTimes = JSON.parse(Cookies.get("storredTimes"));
-            storredTimes.forEach((time) => {
-                displayTimes.value.push({ time: formatTime(time.time.toString()), id: time.id });
-            });
+            storredTimes.value = JSON.parse(Cookies.get("storredTimes"));
         }
 
         return {
+            storredTimes,
             recieveTime,
-            displayTimes,
             deleteTime,
+            addPlus2,
         };
     },
 });
