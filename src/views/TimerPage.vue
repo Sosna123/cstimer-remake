@@ -39,8 +39,7 @@ export default defineComponent({
                 id: currentId,
             });
             //* set the cookies
-            Cookies.set("currentId", currentId, { expires: 7200 /*about 20 years*/ });
-            Cookies.set("storredTimes", JSON.stringify(storredTimes.value), { expires: 7200 });
+            Cookies.set("storredTimes", JSON.stringify(storredTimes.value), { expires: 7200 /*about 20 years*/ });
             //* sort the arrays
             storredTimes.value.sort((a, b) => {
                 if (a.id > b.id) {
@@ -75,8 +74,8 @@ export default defineComponent({
         }
 
         if (Cookies.get("storredTimes")) {
-            currentId = Cookies.get("currentId");
             storredTimes.value = JSON.parse(Cookies.get("storredTimes"));
+            currentId = storredTimes.value[storredTimes.value.length - 1].id;
         }
 
         return {
